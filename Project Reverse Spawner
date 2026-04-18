@@ -106,69 +106,50 @@ infJumpBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 🧠 AUTO BRAINROT
-local instantBtn = createButton(MainPage, "🧠 Auto Brainrot: OFF")
+-- 🧠 AUTO BRAINROT (DISABLED - GUI ONLY)
+
+local instantBtn = createButton(MainPage, "🧠 Instant Steal: OFF")
 local instantEnabled = false
-local autoConnection
-
-local function isBrainrot(obj)
-    return string.find(string.lower(obj.Name), "brainrot")
-end
-
-local function getClosestPrompt()
-    local char = Player.Character
-    if not char then return nil end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return nil end
-
-    local closest, dist = nil, math.huge
-
-    for _, v in pairs(workspace:GetDescendants()) do
-        if v:IsA("ProximityPrompt") and v.Parent:IsA("BasePart") and isBrainrot(v.Parent) then
-            local d = (v.Parent.Position - hrp.Position).Magnitude
-            if d < dist and d <= (v.MaxActivationDistance or 10) then
-                closest = v
-                dist = d
-            end
-        end
-    end
-    return closest
-end
 
 instantBtn.MouseButton1Click:Connect(function()
     instantEnabled = not instantEnabled
 
     if instantEnabled then
-        instantBtn.Text = "🧠 Auto Brainrot: ON"
+        instantBtn.Text = "🧠 Instant Steal: ON"
         instantBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 130)
-
-        autoConnection = RunService.Heartbeat:Connect(function()
-            local prompt = getClosestPrompt()
-            if prompt then
-                pcall(function()
-                    fireproximityprompt(prompt)
-                end)
-            end
-        end)
     else
-        instantBtn.Text = "🧠 Auto Brainrot: OFF"
+        instantBtn.Text = "🧠 Instant Steal: OFF"
         instantBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 85)
-        if autoConnection then autoConnection:Disconnect() end
     end
 end)
 
--- ⚡ SPEED 100 TOGGLE
+-- ⚡ SPEED TOGGLE (FIXED)
+
 local speedBtn = createButton(MainPage, "⚡ Speed: OFF")
 local speedEnabled = false
 
 local function applySpeed()
-    local hum = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
-    if hum then hum.WalkSpeed = speedEnabled and 100 or 16 end
+    local char = Player.Character
+    if not char then return end
+
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if hum then
+        hum.WalkSpeed = speedEnabled and 200 or 100
+    end
 end
+
+-- keep speed applied constantly (fixes reset issue)
+task.spawn(function()
+    while true do
+        task.wait(0.5)
+        applySpeed()
+    end
+end)
 
 speedBtn.MouseButton1Click:Connect(function()
     speedEnabled = not speedEnabled
     applySpeed()
+
     speedBtn.Text = speedEnabled and "⚡ Speed: ON" or "⚡ Speed: OFF"
 end)
 
